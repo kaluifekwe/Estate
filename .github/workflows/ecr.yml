@@ -8,7 +8,7 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ACCOUNT_ID: "134606630954"
-  ECR_REPO: "real-estate"
+  ECR_REPO: "real-easte"  # your actual ECR repo name
 
 jobs:
   deploy:
@@ -27,8 +27,12 @@ jobs:
 
       - name: Build, tag, and push
         run: |
-          IMAGE_TAG=${{ github.sha }}
           REGISTRY=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-          docker build -t $ECR_REPO:$IMAGE_TAG .
-          docker tag $ECR_REPO:$IMAGE_TAG $REGISTRY/$ECR_REPO:$IMAGE_TAG
-          docker push $REGISTRY/$ECR_REPO:$IMAGE_TAG
+          VERSION_TAG=v${{ github.run_number }}     # auto-increment: v1, v2, v3...
+          SHA_TAG=${{ github.sha }}
+
+          docker build -t $ECR_REPO:$VERSION_TAG .
+          docker tag $ECR_REPO:$VERSION_TAG $REGISTRY/$ECR_REPO:$VERSION_TAG
+          docker tag $ECR_REPO:$VERSION_TAG $REGISTRY/$ECR_REPO:$SHA_TAG
+          docker push $REGISTRY/$ECR_REPO:$VERSION_TAG
+          docker push $REGISTRY/$ECR_REPO:$SHA_TAG
